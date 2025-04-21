@@ -6,3 +6,5 @@ class Apiresponse{
         this.success=stauscode
     }
 }
+
+export {Apiresponse}
