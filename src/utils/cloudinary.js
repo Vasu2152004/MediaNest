@@ -16,10 +16,11 @@ import fs from "fs";
                 return null;
             }
            const response= await cloudinary.uploader.upload(localfilepath, {resource_type: "auto"});
-            console.log(`File is Uploaded successfully ${response.url}`);
+           fs.unlinkSync(localfilepath);
             return response;
         } catch (error) {
             fs.unlinkSync(localfilepath)
+            console.log("cloudinary upload error")
             return null;
         }
     }
