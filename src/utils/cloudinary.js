@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs"; 
+import { Apierror } from "./Apierror";
 
 
 
@@ -25,4 +26,23 @@ import fs from "fs";
         }
     }
 
-export {uploadoncloudinary}
+
+    const deleteoncloudinary = async(localpath)=>{
+        try {
+             const parts = localpath.split('/')
+             const publicidwithext = parts.slice(parts.indexof('upload') +1).join('/')
+             const publicId = publicidwithext.replace(/\.[^/.]+$/,"")
+    
+            const result = await cloudinary.uploader.destroy(publicId)
+            if(!result){
+                throw new Apierror(500,"can not delete file from the cloudinary")
+            }
+            return result;
+        } catch (error) {
+            console.log("error occurs in cloudinary.js and the error is ",error)
+            throw new Apierror(500,"cloudinary deletion is failed")
+        }
+
+    }
+
+export {uploadoncloudinary,deleteoncloudinary}

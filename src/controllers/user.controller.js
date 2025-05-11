@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import bcrypt from "bcryptjs";
 import { Apierror } from "../utils/Apierror.js";
 import { User } from "../models/user.model.js";
-import { uploadoncloudinary } from "../utils/cloudinary.js";
+import { deleteoncloudinary, uploadoncloudinary } from "../utils/cloudinary.js";
 import { Apiresponse } from "../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
 import { response } from "express";
@@ -21,8 +21,6 @@ const generateAccessTokenAndReferenceToken = async (userId) => {
     throw new Apierror(500, "Something went wrong while generating tokens");
   }
 };
-
-
 
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -212,7 +210,7 @@ const changeCurrentPassword = asyncHandler(async(req,res)=>{
 })
 
 const getCurrentUser = asyncHandler(async(req,res)=>{
-  return res.status(200).json(200,req.user,"Current User fetched successfully")
+  return res.status(200).json(new Apiresponse(200,req.user,"Current User fetched successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async(req,res)=>{
@@ -242,6 +240,17 @@ const updateUserCoverimage = asyncHandler(async(req,res)=>{
   if(!coverimageLocalPath){
     throw new Apierror(400,"cover image file is missing")
   }
+
+  const imgurl = req.body.imageUrl;
+  if(!imgurl){
+    throw new Apierror(404,"coverimage file not found")
+  }
+  const deleteavatar = await deleteoncloudinary(imgurl)
+
+  if(!deleteavatar){
+    throw new Apierror(500,"previous coverimage file not deleted")
+  }
+
   const coverimage = await uploadoncloudinary(coverimageLocalPath)
 
   if(!coverimage.url){
@@ -266,6 +275,15 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
   if(!avatarLocalPath){
     throw new Apierror(400,"Avatar file is missing")
   }
+  const imgurl = req.body.imageUrl;
+  if(!imgurl){
+    throw new Apierror(404,"avatar file not found")
+  }
+  const deleteavatar = await deleteoncloudinary(imgurl)
+
+  if(!deleteavatar){
+    throw new Apierror(500,"previous avatar file not deleted")
+  }
   const avatar = await uploadoncloudinary(avatarLocalPath)
 
   if(!avatar.url){
@@ -282,7 +300,7 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
     {new:true}
   ).select("-password")
 
-  return res.status(200).json(200,user,"Avatar is updated successfully")
+  return res.status(200).json(new Apiresponse(200,user,"Avatar is updated successfully"))
 
 })
 
